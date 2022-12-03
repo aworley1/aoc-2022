@@ -30,4 +30,9 @@ internal class Day3KtTest {
     fun `should match part 1 sample`() {
         assertThat(part1(getSampleInputLines(3,1))).isEqualTo(157)
     }
+
+    @Test
+    fun `should match part 2 sample`() {
+        assertThat(part2(getSampleInputLines(3, 2))).isEqualTo(70)
+    }
 }
