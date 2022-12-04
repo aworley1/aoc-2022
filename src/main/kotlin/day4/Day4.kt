@@ -4,18 +4,32 @@ import util.getInputLines
 
 fun main() {
     println(part1(getInputLines(4)))
+    println(part2(getInputLines(4)))
 }
 
 fun part1(input: List<String>): Int {
     return input.map { parse(it) }
-        .count { oneRangeContainsOther(it) }
+        .count { oneRangeContainsOtherCompletely(it) }
 }
 
-fun oneRangeContainsOther(pair: Pair<IntRange, IntRange>): Boolean {
-    return when {
-        pair.first.first <= pair.second.first && pair.first.last >= pair.second.last ||
-        pair.second.first <= pair.first.first && pair.second.last >= pair.first.last -> true
-        else -> false
+fun part2(input: List<String>): Int {
+    return input.map { parse(it) }
+        .count { oneRangeContainsOtherPartially(it) }
+}
+
+fun oneRangeContainsOtherCompletely(pair: Pair<IntRange, IntRange>): Boolean {
+    return with(pair) {
+        val firstSet = first.toSet()
+        val secondSet = second.toSet()
+        val intersection = firstSet.intersect(secondSet)
+
+        intersection.containsAll(firstSet) || intersection.containsAll(secondSet)
+    }
+}
+
+fun oneRangeContainsOtherPartially(pair: Pair<IntRange, IntRange>): Boolean {
+    return with(pair) {
+        first.toSet().intersect(second.toSet()).isNotEmpty()
     }
 }
 

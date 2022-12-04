@@ -14,14 +14,27 @@ internal class Day4KtTest {
     }
 
     @Test
-    fun `should match sample input`() {
+    fun `should match sample input part 1`() {
         assertThat(part1(getSampleInputLines(4, 1))).isEqualTo(2)
     }
 
     @Test
     fun `should decide if one range contains the other completely`() {
-        assertThat(oneRangeContainsOther(Pair(1..10, 2..5))).isTrue()
-        assertThat(oneRangeContainsOther(Pair(2..5, 1..10))).isTrue()
-        assertThat(oneRangeContainsOther(Pair(2..5, 3..7))).isFalse()
+        assertThat(oneRangeContainsOtherCompletely(Pair(1..10, 2..5))).isTrue()
+        assertThat(oneRangeContainsOtherCompletely(Pair(2..5, 1..10))).isTrue()
+        assertThat(oneRangeContainsOtherCompletely(Pair(2..5, 3..7))).isFalse()
+    }
+
+    @Test
+    fun `should decide if one range contains the other at all`() {
+        assertThat(oneRangeContainsOtherPartially(Pair(1..10, 9..11))).isTrue()
+        assertThat(oneRangeContainsOtherPartially(Pair(9..11, 1..10))).isTrue()
+        assertThat(oneRangeContainsOtherPartially(Pair(1..2, 3..4))).isFalse()
+        assertThat(oneRangeContainsOtherPartially(Pair(3..4, 1..2))).isFalse()
+    }
+
+    @Test
+    fun `should match sample input part 2`() {
+        assertThat(part2(getSampleInputLines(4, 1))).isEqualTo(4)
     }
 }
