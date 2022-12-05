@@ -13,36 +13,28 @@ fun part1(input: String): String {
     val (stacksInput, instructionsInput) = input.split("\n\n")
 
     val stacks = parseStacks(stacksInput)
-    val instructions = instructionsInput.split("\n").map { it.split(" ") }
+    val instructions = parseInstructions(instructionsInput)
 
     val modifiedStacks = instructions.fold(stacks) { acc, instruction ->
-        val count = instruction[1]
-        val from = instruction[3]
-        val to = instruction[5]
-
-        (1..count.toInt()).fold(acc) { acc2, _ ->
-            acc2.moveCrates(1, from, to)
+        (1..instruction.count).fold(acc) { acc2, _ ->
+            acc2.moveCrates(1, instruction.from, instruction.to)
         }
     }
 
-    return modifiedStacks.values.joinToString("") { it.last() }
+    return modifiedStacks.toMessage()
 }
 
 fun part2(input: String): String {
     val (stacksInput, instructionsInput) = input.split("\n\n")
 
     val stacks = parseStacks(stacksInput)
-    val instructions = instructionsInput.split("\n").map { it.split(" ") }
+    val instructions = parseInstructions(instructionsInput)
 
     val modifiedStacks = instructions.fold(stacks) { acc, instruction ->
-        val count = instruction[1]
-        val from = instruction[3]
-        val to = instruction[5]
-
-        acc.moveCrates(count.toInt(), from, to)
+        acc.moveCrates(instruction.count, instruction.from, instruction.to)
     }
 
-    return modifiedStacks.values.joinToString("") { it.last() }
+    return modifiedStacks.toMessage()
 }
 
 fun Stacks.moveCrates(count: Int, fromLabel: String, toLabel: String): Stacks {
@@ -56,6 +48,8 @@ fun Stacks.moveCrates(count: Int, fromLabel: String, toLabel: String): Stacks {
             (fromLabel to fromStackWithLastItemsRemoved) +
             (toLabel to toStackWithLastItemsOfFromStack)
 }
+
+fun Stacks.toMessage() = values.joinToString("") { it.last() }
 
 fun parseStacks(input: String): Stacks {
     val lines = input.split("\n")
@@ -73,3 +67,20 @@ fun parseStacks(input: String): Stacks {
         label to crates
     }.toMap()
 }
+
+fun parseInstructions(input: String): List<Instruction> {
+    return input.split("\n").map { it.split(" ") }
+        .map {
+            Instruction(
+                count = it[1].toInt(),
+                from = it[3],
+                to = it[5]
+            )
+        }
+}
+
+data class Instruction(
+    val count: Int,
+    val from: String,
+    val to: String
+)
