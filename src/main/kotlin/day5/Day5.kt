@@ -21,7 +21,7 @@ fun part1(input: String): String {
         val to = instruction[5]
 
         (1..count.toInt()).fold(acc) { acc2, _ ->
-            acc2.moveCrate(from, to)
+            acc2.moveCrates(1, from, to)
         }
     }
 
@@ -43,17 +43,6 @@ fun part2(input: String): String {
     }
 
     return modifiedStacks.values.joinToString("") { it.last() }
-}
-
-fun Stacks.moveCrate(fromLabel: String, toLabel: String): Stacks {
-    val fromStack = this[fromLabel]!!
-    val toStack = this[toLabel]!!
-
-    val fromStackWithLastItemRemoved = fromStack.dropLast(1)
-    val toStackWithLastItemOfFromStack = toStack + fromStack.last()
-    return this +
-            (fromLabel to fromStackWithLastItemRemoved) +
-            (toLabel to toStackWithLastItemOfFromStack)
 }
 
 fun Stacks.moveCrates(count: Int, fromLabel: String, toLabel: String): Stacks {
