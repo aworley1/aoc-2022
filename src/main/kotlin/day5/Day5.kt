@@ -6,6 +6,7 @@ typealias Stacks = Map<String, List<String>>
 
 fun main() {
     println(part1(getInputText(5)))
+    println(part2(getInputText(5)))
 }
 
 fun part1(input: String): String {
@@ -27,6 +28,23 @@ fun part1(input: String): String {
     return modifiedStacks.values.joinToString("") { it.last() }
 }
 
+fun part2(input: String): String {
+    val (stacksInput, instructionsInput) = input.split("\n\n")
+
+    val stacks = parseStacks(stacksInput)
+    val instructions = instructionsInput.split("\n").map { it.split(" ") }
+
+    val modifiedStacks = instructions.fold(stacks) { acc, instruction ->
+        val count = instruction[1]
+        val from = instruction[3]
+        val to = instruction[5]
+
+        acc.moveCrates(count.toInt(), from, to)
+    }
+
+    return modifiedStacks.values.joinToString("") { it.last() }
+}
+
 fun Stacks.moveCrate(fromLabel: String, toLabel: String): Stacks {
     val fromStack = this[fromLabel]!!
     val toStack = this[toLabel]!!
@@ -36,6 +54,18 @@ fun Stacks.moveCrate(fromLabel: String, toLabel: String): Stacks {
     return this +
             (fromLabel to fromStackWithLastItemRemoved) +
             (toLabel to toStackWithLastItemOfFromStack)
+}
+
+fun Stacks.moveCrates(count: Int, fromLabel: String, toLabel: String): Stacks {
+    val fromStack = this[fromLabel]!!
+    val toStack = this[toLabel]!!
+
+    val fromStackWithLastItemsRemoved = fromStack.dropLast(count)
+    val toStackWithLastItemsOfFromStack = toStack + fromStack.takeLast(count)
+
+    return this +
+            (fromLabel to fromStackWithLastItemsRemoved) +
+            (toLabel to toStackWithLastItemsOfFromStack)
 }
 
 fun parseStacks(input: String): Stacks {

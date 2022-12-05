@@ -1,14 +1,13 @@
 package day5
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import util.getSampleInputText
 
 internal class Day5KtTest {
     @Test
     fun `should parse sample stacks`() {
-        val input = getSampleInputText(5,1).split("\n\n").first()
+        val input = getSampleInputText(5, 1).split("\n\n").first()
 
         assertThat(parseStacks(input)).isEqualTo(
             mapOf(
@@ -21,6 +20,11 @@ internal class Day5KtTest {
 
     @Test
     fun `should match sample 1`() {
-        assertThat(part1(getSampleInputText(5,1))).isEqualTo("CMZ")
+        assertThat(part1(getSampleInputText(5, 1))).isEqualTo("CMZ")
+    }
+
+    @Test
+    fun `should match sample 2`() {
+        assertThat(part2(getSampleInputText(5, 1))).isEqualTo("MCD")
     }
 }
