@@ -13,4 +13,13 @@ internal class Day6KtTest {
         assertThat(part1("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg")).isEqualTo(10)
         assertThat(part1("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw")).isEqualTo(11)
     }
+
+    @Test
+    fun `should match part 2 examples`() {
+        assertThat(part2("mjqjpqmgbljsphdztnvjfqwrcgsmlb")).isEqualTo(19)
+        assertThat(part2("bvwbjplbgvbhsrlpgdmjqwftvncz")).isEqualTo(23)
+        assertThat(part2("nppdvjthqldpwncqszvftbrmjlhg")).isEqualTo(23)
+        assertThat(part2("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg")).isEqualTo(29)
+        assertThat(part2("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw")).isEqualTo(26)
+    }
 }
