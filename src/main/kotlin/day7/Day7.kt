@@ -11,36 +11,30 @@ fun main() {
 
 fun part1(input: List<String>): Long {
     val fileMap = createFileMap(parseCommands(input))
-
-    val directoryPaths = fileMap
-        .filterValues { it is Directory }
-        .map { it.key }
-
-    val directoriesWithSizes = directoryPaths.map {
-        it to fileMap.sumFilesForDirectory(it)
-    }.toMap()
+    val directoryPaths = getDirectoryPaths(fileMap)
+    val directoriesWithSizes = getDirectoriesWithSizes(directoryPaths, fileMap)
 
     return directoriesWithSizes.filterValues { it <= 100000 }.values.sum()
 }
 
 fun part2(input: List<String>): Long {
     val fileMap = createFileMap(parseCommands(input))
-
-    val directoryPaths = fileMap
-        .filterValues { it is Directory }
-        .map { it.key }
-
-    val directoriesWithSizes = directoryPaths.map {
-        it to fileMap.sumFilesForDirectory(it)
-    }.toMap()
+    val directoryPaths = getDirectoryPaths(fileMap)
+    val directoriesWithSizes = getDirectoriesWithSizes(directoryPaths, fileMap)
 
     val usedSpace = directoriesWithSizes["/"]!!
     val freeSpace = 70000000 - usedSpace
     val requiredToFree = 30000000 - freeSpace
 
     return directoriesWithSizes.filterValues { it >= requiredToFree }.minBy { it.value }.value
-
 }
+
+private fun getDirectoriesWithSizes(directoryPaths: List<String>, fileMap: FileMap) =
+    directoryPaths.associateWith { fileMap.sumFilesForDirectory(it) }
+
+private fun getDirectoryPaths(fileMap: FileMap) = fileMap
+    .filterValues { it is Directory }
+    .map { it.key }
 
 fun FileMap.sumFilesForDirectory(path: String) = this.filter { (k, v) ->
     k.startsWith(path)
@@ -56,37 +50,36 @@ fun parseCommands(input: List<String>): List<Command> {
 }
 
 fun createFileMap(commands: List<Command>): FileMap {
-    var currentDirectory = ""
-    val output = mutableMapOf<String, FileOrDir>("/" to Directory(""))
+    val initial = Pair("", mapOf<String, FileOrDir>("/" to Directory("")))
 
-    commands.drop(1).forEach {
-        when (it.command) {
-            "cd" -> when (val argument = it.argument!!) {
-                ".." -> currentDirectory = currentDirectory.split("/").dropLast(1).joinToString("/")
-                else -> currentDirectory += "/${argument}"
+    return commands.drop(1).fold(initial) { acc, command ->
+        when (command.command) {
+            "cd" -> when (val argument = command.argument!!) {
+                ".." -> acc.updateCurrentDirectory(acc.first.split("/").dropLast(1).joinToString("/"))
+                else -> acc.updateCurrentDirectory(acc.first + "/${argument}")
             }
 
-            "ls" -> it.output.forEach {
+            "ls" -> command.output.map {
                 val fileOrDir = it.toFileOrDir()
-                output.put("$currentDirectory/${fileOrDir.name}", fileOrDir)
-            }
+                "${acc.first}/${fileOrDir.name}" to fileOrDir
+            }.let { acc.addFiles(it) }
+
+            else -> throw RuntimeException("Impossible!")
         }
-    }
-
-    return output
+    }.second
 }
-
-sealed class FileOrDir(open val name: String)
-data class File(
-    override val name: String,
-    val size: Long
-) : FileOrDir(name)
-
-data class Directory(
-    override val name: String,
-) : FileOrDir(name)
 
 data class Command(val command: String, val argument: String? = null, val output: List<String> = emptyList())
 
-fun String.toFileOrDir() = if (startsWith("dir")) Directory(split(" ").last())
-else File(split(" ").last(), split(" ").first().toLong())
+sealed class FileOrDir(open val name: String)
+data class File(override val name: String, val size: Long) : FileOrDir(name)
+data class Directory(override val name: String) : FileOrDir(name)
+
+fun String.toFileOrDir(): FileOrDir {
+    return if (startsWith("dir")) Directory(split(" ").last())
+    else File(split(" ").last(), split(" ").first().toLong())
+}
+
+fun Pair<String, Map<String, FileOrDir>>.updateCurrentDirectory(name: String) = this.copy(first = name)
+fun Pair<String, Map<String, FileOrDir>>.addFiles(files: List<Pair<String, FileOrDir>>) =
+    this.copy(second = this.second + files.toMap())
