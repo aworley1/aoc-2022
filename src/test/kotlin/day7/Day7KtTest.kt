@@ -32,6 +32,27 @@ internal class Day7KtTest {
         )
     }
 
+    @Test
+    fun `should match sample tree`() {
+        assertThat(createFileMap(parseCommands(getSampleInputLines(7, 1)))).containsExactlyInAnyOrderEntriesOf(
+            mapOf(
+                ("/" to Directory("")),
+                ("/a" to Directory("a")),
+                ("/a/e" to Directory("e")),
+                ("/a/e/i" to File("i", 584)),
+                ("/a/f" to File("f", 29116)),
+                ("/a/g" to File("g", 2557)),
+                ("/a/h.lst" to File("h.lst", 62596)),
+                ("/b.txt" to File("b.txt", 14848514)),
+                ("/c.dat" to File("c.dat", 8504156)),
+                ("/d" to Directory("d")),
+                ("/d/j" to File("j", 4060174)),
+                ("/d/d.log" to File("d.log", 8033020)),
+                ("/d/d.ext" to File("d.ext", 5626152)),
+                ("/d/k" to File("k", 7214296)),
+            )
+        )
+    }
 }
 
 private val sampleFirstLsOutput = listOf("dir a", "14848514 b.txt", "8504156 c.dat", "dir d")

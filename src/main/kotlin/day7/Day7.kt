@@ -5,7 +5,7 @@ import util.getSampleInputLines
 typealias FileMap = Map<String, FileOrDir>
 
 fun main() {
-    parseCommands(getSampleInputLines(7, 1))
+    println(createFileMap(parseCommands(getSampleInputLines(7, 1))))
 }
 
 fun parseCommands(input: List<String>): List<Command> {
@@ -21,12 +21,16 @@ fun createFileMap(commands: List<Command>): FileMap {
     var currentDirectory = ""
     val output = mutableMapOf<String, FileOrDir>("/" to Directory(""))
 
-    commands.forEach {
+    commands.drop(1).forEach {
         when (it.command) {
-            "cd" -> currentDirectory += it.argument!!
+            "cd" -> when (val argument = it.argument!!) {
+                ".." -> currentDirectory = currentDirectory.split("/").dropLast(1).joinToString("/")
+                else -> currentDirectory += "/${argument}"
+            }
+
             "ls" -> it.output.forEach {
                 val fileOrDir = it.toFileOrDir()
-                output.put("$currentDirectory${fileOrDir.name}", fileOrDir)
+                output.put("$currentDirectory/${fileOrDir.name}", fileOrDir)
             }
         }
     }
