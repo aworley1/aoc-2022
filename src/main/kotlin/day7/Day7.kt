@@ -17,14 +17,34 @@ fun parseCommands(input: List<String>): List<Command> {
     }
 }
 
-sealed class FileOrDir(open val fullPath: String)
+fun createFileMap(commands: List<Command>): FileMap {
+    var currentDirectory = ""
+    val output = mutableMapOf<String, FileOrDir>("/" to Directory(""))
+
+    commands.forEach {
+        when (it.command) {
+            "cd" -> currentDirectory += it.argument!!
+            "ls" -> it.output.forEach {
+                val fileOrDir = it.toFileOrDir()
+                output.put("$currentDirectory${fileOrDir.name}", fileOrDir)
+            }
+        }
+    }
+
+    return output
+}
+
+sealed class FileOrDir(open val name: String)
 data class File(
-    override val fullPath: String,
+    override val name: String,
     val size: Long
-) : FileOrDir(fullPath)
+) : FileOrDir(name)
 
 data class Directory(
-    override val fullPath: String,
-) : FileOrDir(fullPath)
+    override val name: String,
+) : FileOrDir(name)
 
 data class Command(val command: String, val argument: String? = null, val output: List<String> = emptyList())
+
+fun String.toFileOrDir() = if (startsWith("dir")) Directory(split(" ").last())
+else File(split(" ").last(), split(" ").first().toLong())
