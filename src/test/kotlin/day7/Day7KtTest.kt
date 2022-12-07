@@ -58,6 +58,11 @@ internal class Day7KtTest {
     fun `should match part 1 sample output`() {
         assertThat(part1(getSampleInputLines(7, 1))).isEqualTo(95437)
     }
+
+    @Test
+    fun `should match part 2 sample output`() {
+        assertThat(part2(getSampleInputLines(7, 1))).isEqualTo(24933642)
+    }
 }
 
 private val sampleFirstLsOutput = listOf("dir a", "14848514 b.txt", "8504156 c.dat", "dir d")

@@ -1,12 +1,12 @@
 package day7
 
 import util.getInputLines
-import util.getSampleInputLines
 
 typealias FileMap = Map<String, FileOrDir>
 
 fun main() {
     println(part1(getInputLines(7)))
+    println(part2(getInputLines(7)))
 }
 
 fun part1(input: List<String>): Long {
@@ -21,6 +21,25 @@ fun part1(input: List<String>): Long {
     }.toMap()
 
     return directoriesWithSizes.filterValues { it <= 100000 }.values.sum()
+}
+
+fun part2(input: List<String>): Long {
+    val fileMap = createFileMap(parseCommands(input))
+
+    val directoryPaths = fileMap
+        .filterValues { it is Directory }
+        .map { it.key }
+
+    val directoriesWithSizes = directoryPaths.map {
+        it to fileMap.sumFilesForDirectory(it)
+    }.toMap()
+
+    val usedSpace = directoriesWithSizes["/"]!!
+    val freeSpace = 70000000 - usedSpace
+    val requiredToFree = 30000000 - freeSpace
+
+    return directoriesWithSizes.filterValues { it >= requiredToFree }.minBy { it.value }.value
+
 }
 
 fun FileMap.sumFilesForDirectory(path: String) = this.filter { (k, v) ->
