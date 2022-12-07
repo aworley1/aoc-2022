@@ -1,12 +1,31 @@
 package day7
 
+import util.getInputLines
 import util.getSampleInputLines
 
 typealias FileMap = Map<String, FileOrDir>
 
 fun main() {
-    println(createFileMap(parseCommands(getSampleInputLines(7, 1))))
+    println(part1(getInputLines(7)))
 }
+
+fun part1(input: List<String>): Long {
+    val fileMap = createFileMap(parseCommands(input))
+
+    val directoryPaths = fileMap
+        .filterValues { it is Directory }
+        .map { it.key }
+
+    val directoriesWithSizes = directoryPaths.map {
+        it to fileMap.sumFilesForDirectory(it)
+    }.toMap()
+
+    return directoriesWithSizes.filterValues { it <= 100000 }.values.sum()
+}
+
+fun FileMap.sumFilesForDirectory(path: String) = this.filter { (k, v) ->
+    k.startsWith(path)
+}.values.filterIsInstance<File>().sumOf { it.size }
 
 fun parseCommands(input: List<String>): List<Command> {
     return input.fold(emptyList()) { acc, line ->
