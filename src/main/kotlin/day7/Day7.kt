@@ -29,17 +29,6 @@ fun part2(input: List<String>): Long {
     return directoriesWithSizes.filterValues { it >= requiredToFree }.minBy { it.value }.value
 }
 
-private fun getDirectoriesWithSizes(directoryPaths: List<String>, fileMap: FileMap) =
-    directoryPaths.associateWith { fileMap.sumFilesForDirectory(it) }
-
-private fun getDirectoryPaths(fileMap: FileMap) = fileMap
-    .filterValues { it is Directory }
-    .map { it.key }
-
-fun FileMap.sumFilesForDirectory(path: String) = this.filter { (k, v) ->
-    k.startsWith(path)
-}.values.filterIsInstance<File>().sumOf { it.size }
-
 fun parseCommands(input: List<String>): List<Command> {
     return input.fold(emptyList()) { acc, line ->
         val split = line.split(" ")
@@ -71,6 +60,17 @@ fun createFileMap(commands: List<Command>): FileMap {
         }
     }.fileMap
 }
+
+private fun getDirectoriesWithSizes(directoryPaths: List<String>, fileMap: FileMap) =
+    directoryPaths.associateWith { fileMap.sumFilesForDirectory(it) }
+
+private fun getDirectoryPaths(fileMap: FileMap) = fileMap
+    .filterValues { it is Directory }
+    .map { it.key }
+
+private fun FileMap.sumFilesForDirectory(path: String) = this.filter { (k, v) ->
+    k.startsWith(path)
+}.values.filterIsInstance<File>().sumOf { it.size }
 
 data class Command(val command: String, val argument: String? = null, val output: List<String> = emptyList())
 
