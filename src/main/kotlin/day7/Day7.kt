@@ -43,6 +43,7 @@ fun FileMap.sumFilesForDirectory(path: String) = this.filter { (k, v) ->
 fun parseCommands(input: List<String>): List<Command> {
     return input.fold(emptyList()) { acc, line ->
         val split = line.split(" ")
+
         if (line.startsWith('$'))
             acc + Command(split[1], split.getOrNull(2))
         else acc.dropLast(1) + acc.last().copy(output = acc.last().output + line)
@@ -50,23 +51,25 @@ fun parseCommands(input: List<String>): List<Command> {
 }
 
 fun createFileMap(commands: List<Command>): FileMap {
-    val initial = Pair("", mapOf<String, FileOrDir>("/" to Directory("")))
+    val initial = CurrentDirectoryAndFileMap(
+        cd = "",
+        fileMap = mapOf<String, FileOrDir>("/" to Directory(""))
+    )
 
     return commands.drop(1).fold(initial) { acc, command ->
         when (command.command) {
             "cd" -> when (val argument = command.argument!!) {
-                ".." -> acc.updateCurrentDirectory(acc.first.split("/").dropLast(1).joinToString("/"))
-                else -> acc.updateCurrentDirectory(acc.first + "/${argument}")
+                ".." -> acc.updateCurrentDirectory(acc.cd.removeLastPathElement())
+                else -> acc.updateCurrentDirectory(acc.cd + "/${argument}")
             }
 
             "ls" -> command.output.map {
-                val fileOrDir = it.toFileOrDir()
-                "${acc.first}/${fileOrDir.name}" to fileOrDir
+                it.toFileOrDir().let { fileOrDir -> "${acc.cd}/${fileOrDir.name}" to fileOrDir }
             }.let { acc.addFiles(it) }
 
             else -> throw RuntimeException("Impossible!")
         }
-    }.second
+    }.fileMap
 }
 
 data class Command(val command: String, val argument: String? = null, val output: List<String> = emptyList())
@@ -80,6 +83,12 @@ fun String.toFileOrDir(): FileOrDir {
     else File(split(" ").last(), split(" ").first().toLong())
 }
 
-fun Pair<String, Map<String, FileOrDir>>.updateCurrentDirectory(name: String) = this.copy(first = name)
-fun Pair<String, Map<String, FileOrDir>>.addFiles(files: List<Pair<String, FileOrDir>>) =
-    this.copy(second = this.second + files.toMap())
+data class CurrentDirectoryAndFileMap(
+    val cd: String,
+    val fileMap: FileMap
+) {
+    fun updateCurrentDirectory(name: String) = this.copy(cd = name)
+    fun addFiles(files: List<Pair<String, FileOrDir>>) = this.copy(fileMap = this.fileMap + files.toMap())
+}
+
+fun String.removeLastPathElement() = split("/").dropLast(1).joinToString("/")
