@@ -14,11 +14,11 @@ fun part1(input: List<String>): Int {
         .map { it[0].toDirection() to it[1].toInt() }
         .flatMap { (direction, count) -> List(count) { direction } }
 
-    val initial = Pair(Rope(ZERO, ZERO), emptySet<Coord>())
+    val initial = Pair(Rope.build(1), emptySet<Coord>())
 
     val tailPositions = instructions.fold(initial) { (rope, tailPositions), direction ->
         val newRope = rope.move(direction)
-        Pair(newRope, tailPositions + newRope.tail)
+        Pair(newRope, tailPositions + newRope.tails.last)
     }.second
 
     return tailPositions.size
@@ -26,20 +26,38 @@ fun part1(input: List<String>): Int {
 
 data class Rope(
     val head: Coord,
-    val tail: Coord
+    val tails: Tails
 ) {
     fun move(direction: Direction): Rope {
         val newHead = head.move(direction)
-        val newTail = when {
-            tail.isTouching(newHead) -> tail
-            newHead.isInSameRowOrCol(tail) -> tail.move(direction)
-            else -> head
-        }
+        val newTails = tails.followHead(newHead, head, direction)
 
         return Rope(
             head = head.move(direction),
-            tail = newTail
+            tails = newTails
         )
+    }
+
+    companion object {
+        fun build(tailsCount: Int) = Rope(ZERO, Tails.build(tailsCount))
+    }
+}
+
+data class Tails(val tails: List<Coord>) {
+    val last: Coord
+        get() = tails.last()
+
+    fun followHead(newHead: Coord, oldHead: Coord, direction: Direction) =
+        Tails(listOf(moveTail(newHead, oldHead, direction)))
+
+    private fun moveTail(newHead: Coord, oldHead: Coord, direction: Direction): Coord = when {
+        last.isTouching(newHead) -> last
+        newHead.isInSameRowOrCol(last) -> last.move(direction)
+        else -> oldHead
+    }
+
+    companion object {
+        fun build(count: Int) = Tails(List(count) { ZERO })
     }
 }
 
@@ -70,13 +88,6 @@ enum class Direction(val addToMove: Coord) {
     DOWN(Coord(-1, 0)),
     LEFT(Coord(0, -1)),
     RIGHT(Coord(0, 1));
-
-    fun getOpposite() = when (this) {
-        UP -> DOWN
-        DOWN -> UP
-        LEFT -> RIGHT
-        RIGHT -> LEFT
-    }
 
     companion object {
         fun String.toDirection() = when (this) {

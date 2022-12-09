@@ -38,27 +38,27 @@ internal class Day9KtTest {
 
     @Test
     fun `should move rope from initial position`() {
-        val inital = Rope(head = Coord(0, 0), tail = Coord(0, 0))
-        assertThat(inital.move(RIGHT)).isEqualTo(Rope(Coord(0, 1), Coord(0, 0)))
+        val inital = Rope.build(1)
+        assertThat(inital.move(RIGHT)).isEqualTo(Rope(Coord(0, 1), Tails(listOf(Coord(0, 0)))))
     }
 
     @Test
     fun `should move rope in the same direction as the tail is lagging`() {
-        val inital = Rope(head = Coord(1, 0), tail = Coord(0, 0))
-        assertThat(inital.move(UP)).isEqualTo(Rope(Coord(2, 0), Coord(1, 0)))
+        val inital = Rope(head = Coord(1, 0), tails = Tails(listOf(Coord(0, 0))))
+        assertThat(inital.move(UP)).isEqualTo(Rope(Coord(2, 0), Tails(listOf(Coord(1, 0)))))
     }
 
     @Test
     fun `should move rope diagonally if needed`() {
         val initial = Rope(
             head = Coord(1,1),
-            tail = Coord(0,0),
+            tails = Tails(listOf(Coord(0,0),))
         )
 
         assertThat(initial.move(UP)).isEqualTo(
             Rope(
                 head = Coord(row = 2, col = 1 ),
-                tail = Coord(row = 1, col = 1)
+                tails = Tails(listOf(Coord(row = 1, col = 1)))
             )
         )
     }
