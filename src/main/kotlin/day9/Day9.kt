@@ -7,21 +7,37 @@ import kotlin.math.abs
 
 fun main() {
     println(part1(getInputLines(9)))
+    println(part2(getInputLines(9)))
 }
 
 fun part1(input: List<String>): Int {
-    val instructions = input.map { it.split(" ") }
-        .map { it[0].toDirection() to it[1].toInt() }
-        .flatMap { (direction, count) -> List(count) { direction } }
-
+    val instructions = getInstructions(input)
     val initial = Pair(Rope.build(1), emptySet<Coord>())
-
-    val tailPositions = instructions.fold(initial) { (rope, tailPositions), direction ->
-        val newRope = rope.move(direction)
-        Pair(newRope, tailPositions + newRope.tails.last)
-    }.second
+    val tailPositions = getLastTailPositions(instructions, initial)
 
     return tailPositions.size
+}
+
+fun part2(input: List<String>): Int {
+    val instructions = getInstructions(input)
+    val initial = Pair(Rope.build(9), emptySet<Coord>())
+    val tailPositions = getLastTailPositions(instructions, initial)
+
+    return tailPositions.size
+}
+
+private fun getLastTailPositions(
+    instructions: List<Direction>,
+    initial: Pair<Rope, Set<Coord>>
+) = instructions.fold(initial) { (rope, tailPositions), direction ->
+    val newRope = rope.move(direction)
+    Pair(newRope, tailPositions + newRope.tails.last)
+}.second
+
+private fun getInstructions(input: List<String>): List<Direction> {
+    return input.map { it.split(" ") }
+        .map { it[0].toDirection() to it[1].toInt() }
+        .flatMap { (direction, count) -> List(count) { direction } }
 }
 
 data class Rope(
@@ -30,7 +46,7 @@ data class Rope(
 ) {
     fun move(direction: Direction): Rope {
         val newHead = head.move(direction)
-        val newTails = tails.followHead(newHead, head, direction)
+        val newTails = tails.follow(newHead)
 
         return Rope(
             head = head.move(direction),
@@ -47,17 +63,26 @@ data class Tails(val tails: List<Coord>) {
     val last: Coord
         get() = tails.last()
 
-    fun followHead(newHead: Coord, oldHead: Coord, direction: Direction) =
-        Tails(listOf(moveTail(newHead, oldHead, direction)))
+    fun follow(newPosition: Coord): Tails {
+        val initial = Pair(newPosition, emptyList<Coord>())
+        val newPositions = tails.fold(initial) { acc, tail ->
+            val (newPositionOfNextTail, output) = acc
+            val newTail = moveTail(tail, newPositionOfNextTail)
 
-    private fun moveTail(newHead: Coord, oldHead: Coord, direction: Direction): Coord = when {
-        last.isTouching(newHead) -> last
-        newHead.isInSameRowOrCol(last) -> last.move(direction)
-        else -> oldHead
+            Pair(newTail, output + newTail)
+        }.second
+
+        return Tails(newPositions)
     }
 
     companion object {
         fun build(count: Int) = Tails(List(count) { ZERO })
+
+        private fun moveTail(tail: Coord, newPositionToFollow: Coord): Coord = when {
+            tail.isTouching(newPositionToFollow) -> tail
+            tail.isInSameRowOrCol(newPositionToFollow) -> tail.moveStraightTowards(newPositionToFollow)
+            else -> tail.moveDiagonallyTowards(newPositionToFollow)
+        }
     }
 }
 
@@ -77,6 +102,27 @@ data class Coord(val row: Int, val col: Int) {
     fun isInSameRowOrCol(other: Coord): Boolean = this.isInSameCol(other) || this.isInSameRow(other)
     fun isInSameRow(other: Coord): Boolean = this.row == other.row
     fun isInSameCol(other: Coord): Boolean = this.col == other.col
+
+    fun moveDiagonallyTowards(other: Coord): Coord {
+        if (this.isInSameRowOrCol(other)) throw RuntimeException("Is in the same row or column")
+
+        val move = Coord(
+            row = if (this.row > other.row) -1 else 1,
+            col = if (this.col > other.col) -1 else 1
+        )
+
+        return this + move
+    }
+
+    fun moveStraightTowards(other: Coord): Coord {
+        val move = Coord(
+            col = if (this.isInSameRow(other)) if (this.col > other.col) -1 else 1 else 0,
+            row = if (this.isInSameCol(other)) if (this.row > other.row) -1 else 1 else 0
+        )
+
+        return this + move
+
+    }
 
     companion object {
         val ZERO = Coord(0, 0)
