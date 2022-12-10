@@ -5,6 +5,7 @@ import util.getInputLines
 
 fun main() {
     println(part1(getInputLines(10)))
+    println(part2(getInputLines(10)))
 }
 
 fun part1(input: List<String>): Int {
@@ -29,6 +30,34 @@ fun part1(input: List<String>): Int {
             computers.findComputerExecuting(140).findSignalStrength() +
             computers.findComputerExecuting(180).findSignalStrength() +
             computers.findComputerExecuting(220).findSignalStrength()
+}
+
+fun part2(input: List<String>) {
+    val computers = mutableListOf(Computer())
+
+    val instructions = input.map {
+        it.split(" ").let { Pair(it[0], it.getOrNull(1)?.toInt()) }
+    }
+
+    instructions.forEach {
+        when (it.first) {
+            "noop" -> computers.addAll(computers.last().noop())
+            "addx" -> computers.addAll(computers.last().addx(it.second!!))
+            else -> TODO()
+        }
+    }
+
+    (0..5).map { crtRow ->
+        (0..39).map { crtColumn ->
+            val clockCycle = (crtRow * 40) + crtColumn + 1
+            val registerValue = computers.findComputerExecuting(clockCycle).x
+            val sprite = listOf(registerValue - 1, registerValue, registerValue + 1)
+
+            println("crtRow: $crtRow, crtCol: $crtColumn, clockCycle: $clockCycle, registerValue: $registerValue, sprit: $sprite, draw: ${sprite.contains(crtColumn)}")
+
+            if (sprite.contains(crtColumn)) "#" else "."
+        }
+    }.forEach { println(it.joinToString("")) }
 }
 
 private fun List<Computer>.findComputerExecuting(cycle: Int) =
