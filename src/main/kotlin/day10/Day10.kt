@@ -9,20 +9,7 @@ fun main() {
 }
 
 fun part1(input: List<String>): Int {
-    val computers = mutableListOf(Computer())
-
-    val instructions = input.map {
-        it.split(" ").let { Pair(it[0], it.getOrNull(1)?.toInt()) }
-    }
-
-    instructions.forEach {
-        when (it.first) {
-            "noop" -> computers.addAll(computers.last().noop())
-            "addx" -> computers.addAll(computers.last().addx(it.second!!))
-            else -> TODO()
-        }
-    }
-
+    val computers = parseInstructions(input).applyToNewComputer()
 
     return computers.findComputerExecuting(20).findSignalStrength() +
             computers.findComputerExecuting(60).findSignalStrength() +
@@ -33,19 +20,7 @@ fun part1(input: List<String>): Int {
 }
 
 fun part2(input: List<String>) {
-    val computers = mutableListOf(Computer())
-
-    val instructions = input.map {
-        it.split(" ").let { Pair(it[0], it.getOrNull(1)?.toInt()) }
-    }
-
-    instructions.forEach {
-        when (it.first) {
-            "noop" -> computers.addAll(computers.last().noop())
-            "addx" -> computers.addAll(computers.last().addx(it.second!!))
-            else -> TODO()
-        }
-    }
+    val computers = parseInstructions(input).applyToNewComputer()
 
     (0..5).map { crtRow ->
         (0..39).map { crtColumn ->
@@ -53,11 +28,30 @@ fun part2(input: List<String>) {
             val registerValue = computers.findComputerExecuting(clockCycle).x
             val sprite = listOf(registerValue - 1, registerValue, registerValue + 1)
 
-            println("crtRow: $crtRow, crtCol: $crtColumn, clockCycle: $clockCycle, registerValue: $registerValue, sprit: $sprite, draw: ${sprite.contains(crtColumn)}")
-
             if (sprite.contains(crtColumn)) "#" else "."
         }
     }.forEach { println(it.joinToString("")) }
+}
+
+private fun parseInstructions(input: List<String>): List<Pair<String, Int?>> {
+    val instructions = input.map {
+        it.split(" ").let { Pair(it[0], it.getOrNull(1)?.toInt()) }
+    }
+    return instructions
+}
+
+private fun List<Pair<String, Int?>>.applyToNewComputer(): List<Computer> {
+    val computers = mutableListOf(Computer())
+
+    this.forEach {
+        when (it.first) {
+            "noop" -> computers.addAll(computers.last().noop())
+            "addx" -> computers.addAll(computers.last().addx(it.second!!))
+            else -> TODO()
+        }
+    }
+
+    return computers
 }
 
 private fun List<Computer>.findComputerExecuting(cycle: Int) =
