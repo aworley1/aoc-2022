@@ -12,7 +12,7 @@ fun main() {
 
 fun part1(input: List<String>): Int {
     val instructions = getInstructions(input)
-    val initial = Pair(Rope.build(1), emptySet<Coord>())
+    val initial = Rope.build(1)
     val tailPositions = getLastTailPositions(instructions, initial)
 
     return tailPositions.size
@@ -20,7 +20,7 @@ fun part1(input: List<String>): Int {
 
 fun part2(input: List<String>): Int {
     val instructions = getInstructions(input)
-    val initial = Pair(Rope.build(9), emptySet<Coord>())
+    val initial = Rope.build(9)
     val tailPositions = getLastTailPositions(instructions, initial)
 
     return tailPositions.size
@@ -28,8 +28,8 @@ fun part2(input: List<String>): Int {
 
 private fun getLastTailPositions(
     instructions: List<Direction>,
-    initial: Pair<Rope, Set<Coord>>
-) = instructions.fold(initial) { (rope, tailPositions), direction ->
+    initialRope: Rope
+) = instructions.fold(initialRope to emptySet<Coord>()) { (rope, tailPositions), direction ->
     val newRope = rope.move(direction)
     Pair(newRope, tailPositions + newRope.tails.last)
 }.second
@@ -100,8 +100,8 @@ data class Coord(val row: Int, val col: Int) {
     }
 
     fun isInSameRowOrCol(other: Coord): Boolean = this.isInSameCol(other) || this.isInSameRow(other)
-    fun isInSameRow(other: Coord): Boolean = this.row == other.row
-    fun isInSameCol(other: Coord): Boolean = this.col == other.col
+    private fun isInSameRow(other: Coord): Boolean = this.row == other.row
+    private fun isInSameCol(other: Coord): Boolean = this.col == other.col
 
     fun moveDiagonallyTowards(other: Coord): Coord {
         if (this.isInSameRowOrCol(other)) throw RuntimeException("Is in the same row or column")
